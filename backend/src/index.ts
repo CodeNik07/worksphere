@@ -1,4 +1,5 @@
 import "dotenv/config";
+import "./config/passport.config";
 import express, { NextFunction, Request, Response } from "express";
 import cors from "cors";
 import session from "cookie-session";
@@ -6,6 +7,8 @@ import { config } from "./config/app.config";
 import connectDatabase from "./config/database.config";
 import { errorHandler } from "./middleware/errorHandler.middleware";
 import { asyncHandler } from "./middleware/asyncHandler.middleware";
+import authRoutes from "./routes/auth.route";
+import passport from "passport";
 
 const app = express();
 const BASE_PATH = config.BASE_PATH;
@@ -25,6 +28,9 @@ app.use(
   })
 );
 
+app.use(passport.initialize());
+app.use(passport.session());
+
 app.use(
   cors({
     origin: config.FRONTEND_ORIGIN,
@@ -41,9 +47,13 @@ app.get(
   })
 );
 
+app.use(`${BASE_PATH}/auth`, authRoutes);
+
 app.use(errorHandler);
 
 app.listen(config.PORT, async () => {
   console.log(`Server listening on port ${config.PORT} in ${config.NODE_ENV}`);
   await connectDatabase();
+  console.log(BASE_PATH);
+  
 });
